@@ -1,35 +1,35 @@
 def parse_record(line: str) -> dict:
     """
-    Парсит строку формата 'Город;Температура;Дата'.
-    Пример: "Азов;24.5;2026-07-01" -> {"city": "Азов", "temperature": 24.5, "date": "2026-07-01"}
+    Разбирает строку 'город;температура;дата' в словарь.
+    Вызывает ValueError при неверном формате.
     """
-    line = line.strip()
-    if not line:
-        raise ValueError("Пустая строка")
+    parts = line.split(";")
     
-    parts = line.split(';')
     if len(parts) != 3:
-        raise ValueError("Неверный формат строки")
+        raise ValueError(f"Ожидалось 3 поля, получено {len(parts)}")
     
-    city = parts[0].strip()
-    date = parts[2].strip()
+    city, temp_str, date = parts
     
-    # ИСПРАВЛЕНИЕ 1: используем float, чтобы 30 превратилось в 30.0
+    # Убираем пробелы у города и даты
+    city = city.strip()
+    date = date.strip()
+    
+    # Проверка на пустые поля
+    if not city or not date:
+        raise ValueError("Город или дата не могут быть пустыми")
+    
     try:
-        temperature = float(parts[1].strip())
+        # Убираем пробелы, заменяем запятую на точку и преобразуем в число
+        temp_clean = temp_str.strip().replace(',', '.')
+        temperature = float(temp_clean)
     except ValueError:
-        raise ValueError("Температура должна быть числом")
+        raise ValueError(f"Температура '{temp_str}' не является числом")
         
-    if not city:
-        raise ValueError("Пустой город")
-
-    # ИСПРАВЛЕНИЕ 2: ключ "temperature", а не "temp"
     return {
         "city": city,
         "temperature": temperature,
         "date": date
     }
-
 
 def read_valid(lines: list) -> list:
     """

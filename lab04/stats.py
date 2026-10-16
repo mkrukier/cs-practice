@@ -1,74 +1,80 @@
-import sys
-
 def parse_record(line: str) -> dict:
     """
-    Разбирает строку 'город;температура;дата' в словарь.
-    Вызывает ValueError при неверном формате.
+    Парсит строку формата 'Город;Температура;Дата'.
+    Пример: "Азов;24.5;2026-07-01" -> {"city": "Азов", "temperature": 24.5, "date": "2026-07-01"}
     """
-    parts = line.split(";")
+    line = line.strip()
+    if not line:
+        raise ValueError("Пустая строка")
     
-    # Проверка 1: полей ровно три
+    parts = line.split(';')
     if len(parts) != 3:
-        raise ValueError(f"Ожидалось 3 поля, получено {len(parts)}")
+        raise ValueError("Неверный формат строки")
     
-    city, temp_str, date = parts
+    city = parts[0].strip()
+    date = parts[2].strip()
     
-    # Проверка 2: город и дата не пустые
-    if not city.strip() or not date.strip():
-        raise ValueError("Город или дата не могут быть пустыми")
-    
-    # Проверка 3: температура — число
+    # ИСПРАВЛЕНИЕ 1: используем float, чтобы 30 превратилось в 30.0
     try:
-        temp = float(temp_str)
+        temperature = float(parts[1].strip())
     except ValueError:
-        # Перехватываем ошибку float и возбуждаем свою с понятным сообщением
-        raise ValueError(f"Температура '{temp_str}' не является числом")
+        raise ValueError("Температура должна быть числом")
         
+    if not city:
+        raise ValueError("Пустой город")
+
+    # ИСПРАВЛЕНИЕ 2: ключ "temperature", а не "temp"
     return {
-        "city": city.strip(),
-        "temp": temp,
-        "date": date.strip()
+        "city": city,
+        "temperature": temperature,
+        "date": date
     }
 
-def read_valid(lines: list[str]) -> list[dict]:
+
+def read_valid(lines: list) -> list:
     """
-    Разбирает строки журнала, пропуская пустые и негодные строки.
+    Читает список строк, игнорирует некорректные (мусор, пустые строки).
     """
-    records = []
+    valid_records = []
     for line in lines:
-        # Пропускаем пустые строки молча
-        if not line.strip():
-            continue
-        
         try:
             record = parse_record(line)
-            records.append(record)
-        except ValueError:
-            # Пропускаем негодные строки (ошибки формата)
+            valid_records.append(record)
+        except (ValueError, IndexError):
+            # Пропускаем "мусор" и пустые строки
             continue
-            
-    return records
+    return valid_records
 
-def average_by_city(records: list[dict]) -> dict:
+
+def average_by_city(records: list) -> dict:
     """
-    Считает среднюю температуру по каждому городу, округляя до десятых.
+    Считает среднюю температуру по каждому городу.
+    Возвращает словарь вида {"Азов": 24.5, "Таганрог": 30.0}
     """
-    total = {}
-    count = {}
+    if not records:
+        return {}
+        
+    city_sums = {}
+    city_counts = {}
     
     for rec in records:
         city = rec["city"]
-        temp = rec["temp"]
+        # ИСПРАВЛЕНИЕ 3: используем правильный ключ "temperature"
+        temp = rec["temperature"] 
         
-        total[city] = total.get(city, 0.0) + temp
-        count[city] = count.get(city, 0) + 1
+        if city not in city_sums:
+            city_sums[city] = 0.0
+            city_counts[city] = 0
+            
+        city_sums[city] += temp
+        city_counts[city] += 1
         
     result = {}
-    for city in total:
-        # Округляем до десятых (1 знак после запятой)
-        result[city] = round(total[city] / count[city], 1)
+    for city in city_sums:
+        result[city] = city_sums[city] / city_counts[city]
         
     return result
+
 
 def warmest_city(records: list[dict]) -> str:
     """
@@ -80,8 +86,8 @@ def warmest_city(records: list[dict]) -> str:
     if not avg_temps:
         return ""
         
-    # Сортируем города: сначала по температуре (по убыванию), потом по имени (по возрастанию)
-    # Используем lambda для сортировки
+    # Сортируем: сначала по температуре (по убыванию), 
+    # при равенстве — по названию города (по возрастанию)
     sorted_cities = sorted(
         avg_temps.items(), 
         key=lambda item: (-item[1], item[0])

@@ -85,21 +85,16 @@ def top_errors(lines, n):
     return pairs[:n]
 
 def format_report(counts, errors):
-    # Начинаем формировать список строк для отчета
-    report_lines = ["отчёт по журналу", ""]
+    # Начинаем с заголовка
+    text = "отчёт по журналу\n\n"
     
-    # Выводим уровни в алфавитном порядке
+    # Выводим уровни по алфавиту
     for level in sorted(counts.keys()):
-        report_lines.append(f"{level}: {counts[level]}")
+        text += f"{level}: {counts[level]}\n"
         
     # Добавляем блок с ошибками
-    report_lines.append("")
-    report_lines.append("частые ошибки:")
+    text += "\nчастые ошибки:\n"
     for msg, count in errors:
-        report_lines.append(f"- {msg} — {count}")
+        text += f"- {msg} — {count}\n"
         
-    # В конце текста должен быть перевод строки
-    report_lines.append("")
-    
-    # Склеиваем список строк в одну большую строку через символ переноса
-    return "\n".join(report_lines)
+    return text

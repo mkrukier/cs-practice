@@ -93,6 +93,6 @@ def format_report(counts, errors):
     text += "\nчастые ошибки:\n"
     for msg, count in errors:
         # Обрати внимание на длинное тире (—) вместо дефиса (-)!
-        text += f"- {msg} - {count}\n" 
+        text += f"- {msg}— {count}\n" 
         
     return text

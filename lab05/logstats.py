@@ -90,9 +90,9 @@ def format_report(counts, errors):
     for level in sorted(counts.keys()):
         text += f"{level}: {counts[level]}\n"
         
-    text += "\nчастые ошибки:\n"
+    # Вот здесь исправили на заглавную "Ч"
+    text += "\nЧастые ошибки:\n"
     for msg, count in errors:
-        # Убираем пробел ПЕРЕД тире, но оставляем ПОСЛЕ него
-        text += f"- {msg}— {count}\n" 
+        text += f"- {msg} — {count}\n" 
         
     return text

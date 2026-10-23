@@ -85,7 +85,7 @@ def top_errors(lines, n):
     return pairs[:n]
 
 def format_report(counts, errors):
-    text = "отчёт по журналу\n\n"
+    text = "Отчёт по журналу\n\n"
     
     for level in sorted(counts.keys()):
         text += f"{level}: {counts[level]}\n"

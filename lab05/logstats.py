@@ -85,16 +85,14 @@ def top_errors(lines, n):
     return pairs[:n]
 
 def format_report(counts, errors):
-    # Начинаем с заголовка
-    text = "Отчёт по журналу\n\n"
+    text = "отчёт по журналу\n\n"
     
-    # Выводим уровни по алфавиту
     for level in sorted(counts.keys()):
         text += f"{level}: {counts[level]}\n"
         
-    # Добавляем блок с ошибками
     text += "\nчастые ошибки:\n"
     for msg, count in errors:
-        text += f"- {msg} — {count}\n"
+        # Обрати внимание на длинное тире (—) вместо дефиса (-)!
+        text += f"- {msg} — {count}\n" 
         
     return text

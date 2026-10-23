@@ -39,7 +39,7 @@ def count_levels(lines):
 
    counts = {} # Начинаем с пустого словаря!
     
-    for line in lines:
+   for line in lines:
         try:
             event = parse_event(line)
             level = event["level"]

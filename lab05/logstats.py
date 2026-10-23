@@ -86,7 +86,7 @@ def top_errors(lines, n):
 
 def format_report(counts, errors):
     # Начинаем с заголовка
-    text = "отчёт по журналу\n\n"
+    text = "Отчёт по журналу\n\n"
     
     # Выводим уровни по алфавиту
     for level in sorted(counts.keys()):

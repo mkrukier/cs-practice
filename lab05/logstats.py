@@ -29,18 +29,17 @@ def parse_event(line):
     }
 
 def count_levels(lines):
-    # Создаем пустой словарь для подсчета
     counts = {}
-    
     for line in lines:
+        # Пропускаем пустые строки и строки из одних пробелов
+        if not line.strip():
+            continue
+            
         try:
-            # Пытаемся распарсить строку
             event = parse_event(line)
             level = event["level"]
-            # Если уровень уже есть в словаре, прибавляем 1, если нет — начинаем с 1
             counts[level] = counts.get(level, 0) + 1
         except ValueError:
-            # Если словили ошибку, значит строка битая, считаем её в BROKEN
             counts["BROKEN"] = counts.get("BROKEN", 0) + 1
             
     return counts
@@ -48,6 +47,22 @@ def count_levels(lines):
 def top_errors(lines, n):
     # Словарь для подсчета частоты сообщений об ошибках
     error_counts = {}
+    for line in lines:
+        # Тоже пропускаем пустые строки
+        if not line.strip():
+            continue
+          
+        try:
+            event = parse_event(line)
+            if event["level"] == "ERROR":
+                msg = event["message"]
+                error_counts[msg] = error_counts.get(msg, 0) + 1
+        except ValueError:
+            pass
+
+    pairs = [[msg, count] for msg, count in error_counts.items()]
+    pairs.sort(key=lambda x: (-x[1], x[0]))
+    return pairs[:n]
     
     for line in lines:
         try:

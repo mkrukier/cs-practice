@@ -92,7 +92,7 @@ def format_report(counts, errors):
         
     text += "\nчастые ошибки:\n"
     for msg, count in errors:
-        # Используем chr(8212) — это гарантированно длинное тире (Em dash)
-        text += f"- {msg} {chr(8212)} {count}\n" 
+        # Убираем пробел ПЕРЕД тире, но оставляем ПОСЛЕ него
+        text += f"- {msg}— {count}\n" 
         
     return text

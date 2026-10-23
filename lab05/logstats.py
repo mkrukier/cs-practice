@@ -36,25 +36,21 @@ def count_levels(lines):
     
     #Считает количество строк каждого уровня.
     #Испорченные строки идут в ключ BROKEN.
-    
-    counts = {
-        "DEBUG": 0,
-        "INFO": 0,
-        "WARNING": 0,
-        "ERROR": 0,
-        "BROKEN": 0
-    }
+
+   counts = {} # Начинаем с пустого словаря!
     
     for line in lines:
         try:
             event = parse_event(line)
             level = event["level"]
-            counts[level] += 1
+            # Если уровень встречается впервые, создаем его с нулем и прибавляем 1
+            counts[level] = counts.get(level, 0) + 1
         except ValueError:
-            # Если parse_event выбросил ValueError, значит строка испорчена
-            counts["BROKEN"] += 1
+            # Если строка испорчена, считаем её в BROKEN
+            counts["BROKEN"] = counts.get("BROKEN", 0) + 1
             
     return counts
+
 
 def top_errors(lines, n):
     

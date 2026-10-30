@@ -1,50 +1,70 @@
-def count_by_extension(paths):
-    counts = {}
+def count_by_extension(paths: list[str]) -> dict[str, int]:
+    # Считает количество файлов для каждого расширения.
+    # Расширение — то, что после последней точки, в нижнем регистре, без точки.
+    # Файлы без расширения (Makefile, .gitig) получают пустой ключ "".
+    
+    result = {}
     for path in paths:
-        if "." in path and path.rfind(".") > 0:
-            ext = path.rsplit(".", 1)[-1].lower()
-        else:
+        # 1. Берем только имя файла (отсекаем путь к папкам, если он есть)
+        # Например: из "docs/report.PDF" получим "report.PDF"
+        filename = path.split('/')[-1]
+        
+        # 2. Проверяем на "скрытые" файлы (начинаются с точки, как .gitig)
+        # У таких файлов нет имени, только точка в начале, поэтому расширения нет.
+        if filename.startswith('.'):
             ext = ""
+        
+        # 3. Ищем последнюю точку для обычных файлов
+        else:
+            # rfind ищет точку справа налево. Возвращает -1, если точки нет (например, Makefile)
+            last_dot_index = filename.rfind('.')
+            
+            if last_dot_index != -1:
+                # Если точка есть, берем всё, что после неё (для archive.tar.gz это будет "gz")
+                # Срез [:last_dot_index + 1] берет строку ПОСЛЕ последней точки
+                # .lower() переводит в нижний регистр (PDF -> pdf)
+                ext = filename[last_dot_index + 1:].lower()
+            else:
+                # Если точек нет вообще (Makefile)
+                ext = ""
+                
+        # 4. Увеличиваем счетчик для найденного расширения
+        result[ext] = result.get(ext, 0) + 1
+        
+    return result
 
-        counts[ext] = counts.get(ext, 0) + 1
 
-    return counts
-
-
-def deepest_path(paths):
+def deepest_path(paths: list[str]) -> str:
+    # Возвращает путь с наибольшей вложенностью.
+    # При равенстве вложенности — первый по алфавиту.
+    
     if not paths:
         return ""
+    
+    # Сначала сортируем список путей по алфавиту.
+    # Это гарантирует, что если два пути имеют одинаковую вложенность,
+    # функция max() выберет тот, который идет первым по алфавиту.
+    # key=lambda p: p.count('/') считает количество слэшей в каждом пути.
+    return max(sorted(paths), key=lambda p: p.count('/'))
 
-    sorted_paths = sorted(
-        paths,
-        key=lambda x: (-x.count('/'), x)
-    )
 
-    return sorted_paths[0]
-
-
-def human_size(n_bytes):
+def human_size(n_bytes: int) -> str:
+    # Переводит размер из байт в удобные единицы: Б, КБ, МБ, ГБ, ТБ.
+    # Округляет до одного знака после запятой.
+    
     if n_bytes < 1024:
         return f"{n_bytes} Б"
-
+    
     units = ["КБ", "МБ", "ГБ", "ТБ"]
-    size = n_bytes
-    unit_index = -1
-
-    while size >= 1024 and unit_index < len(units) - 1:
-        size /= 1024
-        unit_index += 1
-
-    return f"{size:.1f} {units[unit_index]}"
-
-
-if name == "main":
-    paths_test = ["docs/report.PDF", "notes.txt", "docs/img/logo.png", "Makefile"]
-
-    print(count_by_extension(paths_test))
-
-    print(deepest_path(paths_test))
-
-    print(human_size(900))
-    print(human_size(1536))
-    print(human_size(5 * 1024 * 1024))
+    # Переводим в float для точного деления
+    size = float(n_bytes)
+    
+    for unit in units:
+        size /= 1024.0
+        # Если после деления размер меньше 1024, значит это подходящая единица
+        if size < 1024.0:
+            # Форматирование :.1f автоматически округляет до 1 знака после запятой
+            return f"{size:.1f} {unit}"
+            
+    # Крайний случай: если файл больше терабайта
+    return f"{size:.1f} ТБ"

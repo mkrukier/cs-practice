@@ -4,11 +4,14 @@ def count_by_extension(paths: list[str]) -> dict[str, int]:
         # Отделяем имя файла от пути к папке (если папка есть)
         filename = path.split('/')[-1]
         
-        # Если в имени файла есть точка, берем всё, что после ПЕРВОЙ точки
-        if '.' in filename:
-            # split('.', 1) разбивает строку только по первой точке
-            ext = filename.split('.', 1)[-1].lower()
+        # Находим индекс последней точки
+        last_dot_index = filename.rfind('.')
+        
+        if last_dot_index != -1:
+            # Берем всё, что идет после последней точки, и приводим к нижнему регистру
+            ext = filename[last_dot_index + 1:].lower()
         else:
+            # Если точки нет вообще (например, Makefile)
             ext = ""
             
         result[ext] = result.get(ext, 0) + 1

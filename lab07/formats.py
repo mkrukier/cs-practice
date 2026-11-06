@@ -23,29 +23,27 @@ def parse_settings(lines: list[str]) -> dict:
     current_key = None
     
     for line in lines:
-        # Отрезаем комментарии. Ищем # и берем всё до него.
+        # Отрезаем всё после # (комментарии)
         if '#' in line:
-            line = line.split('#', 1)[0]
+            line = line.split('#')[0]
             
         line = line.strip()
         if not line:
             continue
             
-        # Обработка списков
+        # Обработка элементов списка
         if line.startswith('- '):
             item_str = line[2:].strip()
             if current_key is not None:
                 result[current_key].append(_parse_yaml_value(item_str))
                 
-        # Обработка ключей и значений
+        # Обработка ключей
         elif ':' in line:
-            # Делим только по первому двоеточию!
             key, val = line.split(':', 1)
             key = key.strip()
             val = val.strip()
             
             if not val:
-                # Если значения нет, значит дальше пойдет список
                 current_key = key
                 result[current_key] = []
             else:
@@ -56,7 +54,7 @@ def parse_settings(lines: list[str]) -> dict:
 
 
 def _parse_yaml_value(val: str):
-    # Вспомогательная функция для приведения типов (числа, булевы значения).
+    # Приводим типы строго по правилам из задания.
     val_lower = val.lower()
     
     if val_lower in ('true', 'yes'):
@@ -70,21 +68,13 @@ def _parse_yaml_value(val: str):
     except ValueError:
         pass
         
-    # Проверяем на дробное число (с точкой или запятой)
+    # Проверяем на дробное число (только с точкой, как в задании)
     try:
-        # Если есть запятая, меняем её на точку для float()
-        # Делаем это аккуратно, чтобы не сломать строки типа "Привет, мир"
-        if ',' in val:
-            test_val = val.replace(',', '.')
-            # Проверяем, что после замены это реально число (например, '3.5')
-            # Если там '3.5.6' или 'Привет.мир', float() кинет ошибку, и мы пойдем дальше
-            return float(test_val)
-        else:
-            return float(val)
+        return float(val)
     except ValueError:
         pass
         
-    # Если это не число и не булево, возвращаем как есть (строку)
+    # Всё остальное остается строкой (включая "3,5")
     return val
 
 

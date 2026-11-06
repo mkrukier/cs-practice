@@ -70,7 +70,7 @@ def _parse_yaml_value(val: str):
         
     # Проверяем на дробное число (только с точкой, как в задании)
     try:
-        return float(val.replace(',', '.'))
+        return float(val)
     except ValueError:
         pass
         

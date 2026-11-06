@@ -1,5 +1,5 @@
 def csv_to_records(text: str) -> list[dict]:
-    #Разбирает CSV с заголовком в список словарей.
+    # Разбирает CSV с заголовком в список словарей.
     if not text.strip():
         return []
         
@@ -20,13 +20,39 @@ def csv_to_records(text: str) -> list[dict]:
     return records
 
 
+def _convert_value(val: str):
+    # Вспомогательная функция для приведения типов в YAML.
+    if val.lower() in ('true', 'yes'):
+        return True
+    if val.lower() in ('false', 'no'):
+        return False
+        
+    # Заменяем запятую на точку для корректного парсинга дробных чисел (3,5 -> 3.5)
+    # Но делаем это только если запятая одна (чтобы не сломать строки с кучей запятых)
+    val_for_num = val.replace(',', '.') if val.count(',') == 1 else val
+        
+    try:
+        # Пробуем преобразовать в целое число (используем оригинал, чтобы '1,5' не стало '15')
+        if val.isdigit() or (val.startswith('-') and val[1:].isdigit()):
+            return int(val)
+            
+        # Пробуем преобразовать в число с плавающей точкой
+        return float(val_for_num)
+    except ValueError:
+        pass
+        
+    # Если ничего не подошло, возвращаем как строку
+    return val
+
+
 def parse_settings(lines: list[str]) -> dict:
-    #Простой YAML → словарь.
+    # Простой YAML -> словарь.
     result = {}
     current_key = None
     
     for line in lines:
         # Убираем комментарии (все, что после #)
+        # Делаем это до strip(), чтобы не потерять случай, когда # стоит сразу после значения
         if '#' in line:
             line = line.split('#')[0]
             
@@ -38,8 +64,8 @@ def parse_settings(lines: list[str]) -> dict:
         # Если это элемент списка
         if line.startswith('- '):
             item_str = line[2:].strip()
-            if current_key:
-                # Преобразуем тип элемента списка
+            # На случай, если перед дефисом не было ключа (защита от падения)
+            if current_key is not None:
                 result[current_key].append(_convert_value(item_str))
         # Если это пара "ключ: значение" или просто "ключ:"
         elif ':' in line:
@@ -59,31 +85,8 @@ def parse_settings(lines: list[str]) -> dict:
     return result
 
 
-def _convert_value(val: str):
-    #Вспомогательная функция для приведения типов в YAML.
-    if val.lower() in ('true', 'yes'):
-        return True
-    if val.lower() in ('false', 'no'):
-        return False
-        
-    try:
-        # Пробуем преобразовать в целое число
-        return int(val)
-    except ValueError:
-        pass
-        
-    try:
-        # Пробуем преобразовать в число с плавающей точкой
-        return float(val)
-    except ValueError:
-        pass
-        
-    # Если ничего не подошло, возвращаем как строку
-    return val
-
-
 def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
-    #Дополняет записи сведениями из JSON-справочника по ключу.
+    # Дополняет записи сведениями из JSON-справочника по ключу.
     result = []
     
     for row in rows:
@@ -102,7 +105,6 @@ def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
             for k, v in extra_data.items():
                 if k not in new_row:
                     new_row[k] = v
-                # Если k есть в new_row, мы его НЕ трогаем (запись важнее)
                 
         result.append(new_row)
         
@@ -110,7 +112,7 @@ def merge_by_key(rows: list[dict], extra: dict, key: str = "id") -> list[dict]:
 
 
 def records_to_json(records: list[dict]) -> str:
-    #Список словарей → JSON: ключи по алфавиту, отступ два пробела.
+    # Список словарей -> JSON: ключи по алфавиту, отступ два пробела.
     def format_val(val):
         if isinstance(val, str):
             return f'"{val}"'

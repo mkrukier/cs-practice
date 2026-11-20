@@ -17,10 +17,16 @@ def vector_report(values: list[float]) -> dict:
 
 
 def change_vector(values: list[float]) -> list[float]:
-    arr = np.array(values).copy()  # copy() — не менять исходный список
-    arr[2:5] = 99                  # индексы 2,3,4
-    arr[1::2] = -1                 # каждый второй (с индекса 1)
-    return arr.tolist()
+    arr = np.array(values).copy()
+    
+    # 1. Сначала заменяем каждый второй элемент на -1
+    arr[1::2] = -1
+    
+    # 2. Затем перезаписываем индексы 2, 3, 4 на 99
+    arr[2:5] = 99
+    
+    # Возвращаем как список float (чтобы были точки, как в ожидании)
+    return arr.astype(float).tolist()
 
 
 def cap_above(values: list[float], limit: float) -> list[float]:

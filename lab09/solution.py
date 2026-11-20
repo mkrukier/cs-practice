@@ -19,13 +19,12 @@ def vector_report(values: list[float]) -> dict:
 def change_vector(values: list[float]) -> list[float]:
     arr = np.array(values).copy()
     
-    # 1. Сначала индексы 2, 3, 4 меняем на 99
+    # 1. Сначала меняем 2-4 на 99
     arr[2:5] = 99
     
-    # 2. Затем каждый второй (индексы 1, 3, 5, 7) меняем на -1
-    arr[1::2] = -1
+    # 2. Затем каждый второй (0, 2, 4, 6) на -1
+    arr[0::2] = -1
     
-    # Приводим к float, чтобы были точки, как в ожидании, и возвращаем список
     return arr.astype(float).tolist()
 
 
